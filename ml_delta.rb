@@ -7,6 +7,8 @@ module MLActiveMethod
   SGN     = 0
   SIGMOID = 1
   TANH    = 2
+  # TODO : Need to implement
+  RBF     = 3
 end
 
 class MLDelta
@@ -127,7 +129,7 @@ class MLDelta
   end
   
   def _activateOutputValue(_netOutput)
-    _activatedValue = 0.0
+    _activatedValue = _netOutput
     case @activeMethod
       when MLActiveMethod::SGN
         _activatedValue = @_activeFunction.sgn(_netOutput)
@@ -135,6 +137,8 @@ class MLDelta
         _activatedValue = @_activeFunction.sigmoid(_netOutput)
       when MLActiveMethod::TANH
         _activatedValue = @_activeFunction.tanh(_netOutput)
+      when MLActiveMethod::RBF
+        _activatedValue = @_activeFunction.rbf(_netOutput, 2.0)
       else
         # Nothing else
     end
@@ -149,7 +153,7 @@ class MLDelta
   end
   
   def _fDashOfNet(_netOutput)
-    _dashValue = 0.0
+    _dashValue = _netOutput
     case @activeMethod
       when MLActiveMethod::SGN
         _dashValue = @_activeFunction.dashSgn(_netOutput)
@@ -157,6 +161,8 @@ class MLDelta
         _dashValue = @_activeFunction.dashSigmoid(_netOutput)
       when MLActiveMethod::TANH
         _dashValue = @_activeFunction.dashTanh(_netOutput)
+      when MLActiveMethod::RBF
+        #_dashValue = @_activeFunction.dashRbf(_netOutput)
       else
         # Nothing else
     end
@@ -170,7 +176,6 @@ class MLDelta
   
   def _sumError(_errorValue)
     @_sumError   += (_errorValue * _errorValue)
-    #puts "error #{@_sumError}"
   end
   
   def _turningWeightsWithInputs(_inputs, _targetValue)
@@ -216,5 +221,5 @@ delta.trainingWithIteration(iterationBlock, completionBlock)
 
 # delta.trainingWithCompletion { 
 #   |success, weights, totalIteration| 
-#   puts "hello #{success} #{weights} #{totalIteration}" 
+#   puts "success : #{success}, weights : #{weights}, totalIteration : #{totalIteration}"
 # }
