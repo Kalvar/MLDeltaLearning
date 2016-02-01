@@ -119,7 +119,7 @@ class MLDelta
   private
 
   def _multiplyMatrix(_matrix, _number)
-    return _matrix.map{ |obj| obj + _number }
+    return _matrix.map{ |obj| obj * _number }
   end
   
   def _plusMatrix(_matrix, _anotherMatrix)
@@ -170,6 +170,7 @@ class MLDelta
   
   def _sumError(_errorValue)
     @_sumError   += (_errorValue * _errorValue)
+    #puts "error #{@_sumError}"
   end
   
   def _turningWeightsWithInputs(_inputs, _targetValue)
@@ -185,7 +186,7 @@ class MLDelta
     _newWeights   = _plusMatrix(_weights, _deltaWeights)
     
     @weights.clear()
-    @weights += _newWeights
+    @weights     += _newWeights
     _sumError(_errorValue)
   end
   
@@ -199,41 +200,21 @@ delta.convergenceValue = 0.001
 delta.maxIteration     = 1000
 delta.addPatterns([1.0, -2.0, 0.0, -1.0], -1.0)
 delta.addPatterns([0.0, 1.5, -0.5, -1.0], 1.0)
-#delta.setupWeights([1.0, -1.0, 0.0, 0.5])
-delta.randomWeights()
+delta.setupWeights([1.0, -1.0, 0.0, 0.5])
+#delta.randomWeights()
 
-delta.trainingWithCompletion { 
-  |a, b, c| 
-  puts "hello #{a} #{b} #{c}" 
-}
+iterationBlock = Proc.new do |iteration, weights|
+  puts "iteration : #{iteration}, weights : #{weights}"
+end
 
+completionBlock = Proc.new do |success, weights, totalIteration|
+  puts "success : #{success}, weights : #{weights}, totalIteration : #{totalIteration}"
+  delta.directOutputByPatterns([1.0, -2.0, 0.0, -1.0]){ |predication| puts "predication result is #{predication}" }
+end
 
-    # _delta.activeFunction   = KRDeltaActiveFunctionTanh;
-    # _delta.learningRate     = 1.0f;
-    # _delta.convergenceValue = 0.001f;
-    # _delta.maxIteration     = 1000;
-    # [_delta addPatterns:@[@1.0f, @-2.0f, @0.0f, @-1.0f] target:-1.0f];
-    # [_delta addPatterns:@[@0.0f, @1.5f, @-0.5f, @-1.0f] target:1.0f];
-    # [_delta setupWeights:@[@1.0f, @-1.0f, @0.0f, @0.5f]];
-    # //[_delta randomWeights];
-    # [_delta trainingWithIteration:^(NSInteger iteration, NSArray *weights) {
-    #     NSLog(@"Doing %li iteration : %@", iteration, weights);
-    # } completion:^(BOOL success, NSArray *weights, NSInteger totalIteration) {
-    #     NSLog(@"Done %li iteration : %@", totalIteration, weights);
-    #     [_delta directOutputByPatterns:@[@1.0f, @-2.0f, @0.0f, @-1.0f] completion:^(NSArray *outputs) {
-    #         NSLog(@"Direct Output : %@", outputs);
-    #     }];
-    # }];
+delta.trainingWithIteration(iterationBlock, completionBlock)
 
-
-
-# iterationBlock = Proc.new do |iteration, weights|
-  # puts "iteration : #{iteration}, weights : #{weights}"
-# end
-# 
-# completionBlock = Proc.new do |success, weights, totalIteration|
-  # puts "success : #{success}, weights : #{weights}, totalIteration : #{totalIteration}"
-# end
-# 
-# delta.trainingWithIteration(iterationBlock, completionBlock)
-
+# delta.trainingWithCompletion { 
+#   |success, weights, totalIteration| 
+#   puts "hello #{success} #{weights} #{totalIteration}" 
+# }
