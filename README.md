@@ -11,7 +11,6 @@ require './ml_delta'
 
 #### Normal Case
 ``` ruby
-# Normal Case
 delta                  = MLDelta.new
 delta.activeMethod     = MLActiveMethod::TANH
 delta.learningRate     = 0.8
@@ -40,10 +39,10 @@ delta.trainingWithIteration(iterationBlock, completionBlock)
 #### Lazy Case
 ``` ruby
 # 1. If you wish automatic setups all weights of pattern that you could use delta.randomWeights() to instead of delta.setupWeights().
-# 2. If you just wanna see the result without iteration running that you could just use the method as below :
+# 2. If you just wanna see the result without iteration running that you could directly use the method as below :
 	delta.trainingWithCompletion { 
 	   |success, weights, totalIteration| 
-	   puts "hello #{success} #{weights} #{totalIteration}" 
+	   puts "success : #{success}, weights : #{weights}, totalIteration : #{totalIteration}"
 	}
 ```
 
