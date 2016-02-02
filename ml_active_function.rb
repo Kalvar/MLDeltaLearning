@@ -1,5 +1,5 @@
 # Activition Functions
-
+#
 class MLActiveFunction
   def tanh(x)
     ( 2.0 / ( 1.0 + Math.exp(-1.0 * x) ) ) - 1.0

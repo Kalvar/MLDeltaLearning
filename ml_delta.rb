@@ -5,14 +5,6 @@ DEFAULT_RANDOM_MAX = 0.5
 DEFAULT_RANDOM_MIN = -0.5
 
 class MLDelta
-
-  #include MLActiveMethod
-  private
-  attr_reader   :_activeFunction
-  attr_accessor :_iteration
-  attr_accessor :_sumError
-
-  public
   @@sharedDelta = MLDelta.new
   attr_accessor :patterns
   attr_accessor :weights
@@ -25,15 +17,14 @@ class MLDelta
   attr_accessor :iterationBlock
   attr_accessor :completionBlock
 
+  def initialize
+    @active_function = MLActiveFunction.new
+    @iteration       = 0
+    @sum_error        = 0.0
 
-  def initialize()
-    @_activeFunction  = MLActiveFunction.new
-    @_iteration       = 0
-    @_sumError        = 0.0
-
-    @patterns         = Array.new
-    @weights          = Array.new
-    @targets          = Array.new
+    @patterns         = []
+    @weights          = []
+    @targets          = []
     @learningRate     = 0.5
     @maxIteration     = 1
     @convergenceValue = 0.001
@@ -77,16 +68,16 @@ class MLDelta
   end
 
   def training()
-    @_iteration += 1
-    @_sumError   = 0.0
+    @iteration += 1
+    @sum_error   = 0.0
     @patterns.each_with_index{ |inputs, patternIndex| _turningWeightsWithInputs(inputs, @targets[patternIndex]) }
-    if (@_iteration >= @maxIteration) || (_calculateIterationError() <= @convergenceValue)
+    if (@iteration >= @maxIteration) || (_calculateIterationError() <= @convergenceValue)
       if !@completionBlock.nil?
-        @completionBlock.call( true, @weights, @_iteration )
+        @completionBlock.call( true, @weights, @iteration )
       end
     else
       if !@iterationBlock.nil?
-        @iterationBlock.call( @_iteration, @weights )
+        @iterationBlock.call( @iteration, @weights )
       end
       training()
     end
@@ -125,13 +116,13 @@ class MLDelta
     _activatedValue = _netOutput
     case @activeMethod
       when MLActiveMethod::SGN
-        _activatedValue = @_activeFunction.sgn(_netOutput)
+        _activatedValue = @active_function.sgn(_netOutput)
       when MLActiveMethod::SIGMOID
-        _activatedValue = @_activeFunction.sigmoid(_netOutput)
+        _activatedValue = @active_function.sigmoid(_netOutput)
       when MLActiveMethod::TANH
-        _activatedValue = @_activeFunction.tanh(_netOutput)
+        _activatedValue = @active_function.tanh(_netOutput)
       when MLActiveMethod::RBF
-        _activatedValue = @_activeFunction.rbf(_netOutput, 2.0)
+        _activatedValue = @active_function.rbf(_netOutput, 2.0)
       else
         # Nothing else
     end
@@ -149,13 +140,13 @@ class MLDelta
     _dashValue = _netOutput
     case @activeMethod
       when MLActiveMethod::SGN
-        _dashValue = @_activeFunction.dashSgn(_netOutput)
+        _dashValue = @active_function.dashSgn(_netOutput)
       when MLActiveMethod::SIGMOID
-        _dashValue = @_activeFunction.dashSigmoid(_netOutput)
+        _dashValue = @active_function.dashSigmoid(_netOutput)
       when MLActiveMethod::TANH
-        _dashValue = @_activeFunction.dashTanh(_netOutput)
+        _dashValue = @active_function.dashTanh(_netOutput)
       when MLActiveMethod::RBF
-        #_dashValue = @_activeFunction.dashRbf(_netOutput)
+        #_dashValue = @active_function.dashRbf(_netOutput)
       else
         # Nothing else
     end
@@ -164,11 +155,11 @@ class MLDelta
 
   # Delta defined cost function formula
   def _calculateIterationError()
-    return (@_sumError / @patterns.count()) * 0.5
+    return (@sum_error / @patterns.count()) * 0.5
   end
 
-  def _sumError(_errorValue)
-    @_sumError   += (_errorValue * _errorValue)
+  def sum_error(_errorValue)
+    @sum_error   += (_errorValue * _errorValue)
   end
 
   def _turningWeightsWithInputs(_inputs, _targetValue)
@@ -184,8 +175,8 @@ class MLDelta
     _newWeights   = _plusMatrix(_weights, _deltaWeights)
 
     @weights.clear()
-    @weights     += _newWeights
-    _sumError(_errorValue)
+    @weights += _newWeights
+    sum_error(_errorValue)
   end
 
 end
