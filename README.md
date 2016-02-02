@@ -41,6 +41,12 @@ delta.training_with_iteration(iteration_block, completion_block)
 
 #### Lazy Case
 1. If you wish automatic setups all weights of pattern that you could use delta.random_weights() to instead of delta.setup_weights().
+``` ruby
+# The random scopes of weights between (min, max)
+delta.setup_random_scopes(-0.5, 0.5)
+delta.random_weights()
+```
+
 2. If you just wanna see the result without iteration running that you could directly use the method as below :
 
 ``` ruby
@@ -52,7 +58,7 @@ delta.training_with_completion {
 
 ## Version
 
-V1.0.1
+V1.0.2
 
 ## LICENSE
 
