@@ -1,6 +1,6 @@
 require './ml_delta'
 
-delta 					        = MLDelta.new
+delta                   = MLDelta.new
 delta.active_method 	  = MLActiveMethod::TANH
 delta.learning_rate 	  = 0.8
 delta.convergence_value = 0.001
