@@ -1,25 +1,18 @@
 require './ml_active_function'
+require './ml_active_method'
 
 DEFAULT_RANDOM_MAX = 0.5
 DEFAULT_RANDOM_MIN = -0.5
 
-module MLActiveMethod
-  SGN     = 0
-  SIGMOID = 1
-  TANH    = 2
-  # TODO : Need to implement
-  RBF     = 3
-end
-
 class MLDelta
-  
+
   #include MLActiveMethod
-  private 
+  private
   attr_reader   :_activeFunction
   attr_accessor :_iteration
   attr_accessor :_sumError
-  
-  public 
+
+  public
   @@sharedDelta = MLDelta.new
   attr_accessor :patterns
   attr_accessor :weights
@@ -37,7 +30,7 @@ class MLDelta
     @_activeFunction  = MLActiveFunction.new
     @_iteration       = 0
     @_sumError        = 0.0
-    
+
     @patterns         = Array.new
     @weights          = Array.new
     @targets          = Array.new
@@ -49,14 +42,14 @@ class MLDelta
     @iterationBlock   = nil
     @completionBlock  = nil
   end
-  
+
   # Public methods
   public
 
   def self.sharedDelta
     return @@sharedDelta
   end
-  
+
   def addPatterns(_inputs, _target)
     @patterns.push(_inputs)
     @targets.push(_target)
@@ -123,11 +116,11 @@ class MLDelta
   def _multiplyMatrix(_matrix, _number)
     return _matrix.map{ |obj| obj * _number }
   end
-  
+
   def _plusMatrix(_matrix, _anotherMatrix)
     return _matrix.collect.with_index{ |obj, i| obj + _anotherMatrix[i] }
   end
-  
+
   def _activateOutputValue(_netOutput)
     _activatedValue = _netOutput
     case @activeMethod
@@ -144,14 +137,14 @@ class MLDelta
     end
     return _activatedValue
   end
-  
+
   def _fOfNetWithInputs(_inputs)
     # to_f
     _sum = 0.0
     _inputs.each.with_index{ |obj, i| _sum += ( obj * @weights[i] ) }
     return _activateOutputValue(_sum)
   end
-  
+
   def _fDashOfNet(_netOutput)
     _dashValue = _netOutput
     case @activeMethod
@@ -168,16 +161,16 @@ class MLDelta
     end
     return _dashValue
   end
-  
+
   # Delta defined cost function formula
   def _calculateIterationError()
     return (@_sumError / @patterns.count()) * 0.5
   end
-  
+
   def _sumError(_errorValue)
     @_sumError   += (_errorValue * _errorValue)
   end
-  
+
   def _turningWeightsWithInputs(_inputs, _targetValue)
     _weights      = @weights
     _learningRate = @learningRate
@@ -189,12 +182,12 @@ class MLDelta
     _sigmaValue   = _learningRate * _errorValue * _dashOutput
     _deltaWeights = _multiplyMatrix(_inputs, _sigmaValue)
     _newWeights   = _plusMatrix(_weights, _deltaWeights)
-    
+
     @weights.clear()
     @weights     += _newWeights
     _sumError(_errorValue)
   end
-  
+
 end
 
 # Use methods
@@ -219,7 +212,7 @@ end
 
 delta.trainingWithIteration(iterationBlock, completionBlock)
 
-# delta.trainingWithCompletion { 
-#   |success, weights, totalIteration| 
+# delta.trainingWithCompletion {
+#   |success, weights, totalIteration|
 #   puts "success : #{success}, weights : #{weights}, totalIteration : #{totalIteration}"
 # }
