@@ -41,22 +41,21 @@ class MLDelta
     return @@sharedDelta
   end
 
-  def addPatterns(_inputs, _target)
-    @patterns.push(_inputs)
-    @targets.push(_target)
+  def addPatterns(inputs, target)
+    @patterns << inputs
+    @targets << target
   end
 
-  def setupWeights(_weights)
+  def setupWeights(weights)
+    @weights.clear if @weights.count > 0
+    @weights += weights
+  end
+
+  def randomWeights
     if @weights.count > 0
       @weights.clear()
     end
-    @weights += _weights
-  end
 
-  def randomWeights()
-    if @weights.count > 0
-      @weights.clear()
-    end
     # Follows the inputs count to decide how many weights it needs.
     _randomMaker   = Random.new
     _inputNetCount = @patterns.first().count
@@ -67,66 +66,57 @@ class MLDelta
     end
   end
 
-  def training()
+  def training
     @iteration += 1
-    @sum_error   = 0.0
+    @sum_error = 0.0
     @patterns.each_with_index{ |inputs, patternIndex| _turningWeightsWithInputs(inputs, @targets[patternIndex]) }
+
     if (@iteration >= @maxIteration) || (_calculateIterationError() <= @convergenceValue)
-      if !@completionBlock.nil?
-        @completionBlock.call( true, @weights, @iteration )
-      end
+      @completionBlock.call( true, @weights, @iteration ) unless @completionBlock.nil?
     else
-      if !@iterationBlock.nil?
-        @iterationBlock.call( @iteration, @weights )
-      end
-      training()
+      @iterationBlock.call( @iteration, @weights ) unless @iterationBlock.nil?
+      training
     end
   end
 
   def trainingWithCompletion(&_block)
     @completionBlock = _block
-    training()
+    training
   end
 
-  def trainingWithIteration(_iterationBlock, _completionBlock)
-    @iterationBlock  = _iterationBlock
-    @completionBlock = _completionBlock
-    training()
+  def trainingWithIteration(iterationBlock, completionBlock)
+    @iterationBlock = iterationBlock
+    @completionBlock = completionBlock
+    training
   end
 
-  def directOutputByPatterns(_inputs, &_block)
-    _netOutput = _fOfNetWithInputs(_inputs)
-    if block_given?
-      _block.call(_netOutput)
-    end
+  def directOutputByPatterns(inputs, &block)
+    block.call(_fOfNetWithInputs(inputs)) if block_given?
   end
 
-  # Private methods
   private
-
-  def _multiplyMatrix(_matrix, _number)
-    return _matrix.map{ |obj| obj * _number }
+  def multiply_matrix(matrix, number)
+    matrix.map{ |obj| obj * number }
   end
 
   def _plusMatrix(_matrix, _anotherMatrix)
-    return _matrix.collect.with_index{ |obj, i| obj + _anotherMatrix[i] }
+    _matrix.collect.with_index{ |obj, i| obj + _anotherMatrix[i] }
   end
 
-  def _activateOutputValue(_netOutput)
-    _activatedValue = _netOutput
+  def _activateOutputValue(net_output)
     case @activeMethod
       when MLActiveMethod::SGN
-        _activatedValue = @active_function.sgn(_netOutput)
+        @active_function.sgn(net_output)
       when MLActiveMethod::SIGMOID
-        _activatedValue = @active_function.sigmoid(_netOutput)
+        @active_function.sigmoid(net_output)
       when MLActiveMethod::TANH
-        _activatedValue = @active_function.tanh(_netOutput)
+        @active_function.tanh(net_output)
       when MLActiveMethod::RBF
-        _activatedValue = @active_function.rbf(_netOutput, 2.0)
+        @active_function.rbf(net_output, 2.0)
       else
         # Nothing else
+        net_output
     end
-    return _activatedValue
   end
 
   def _fOfNetWithInputs(_inputs)
@@ -136,42 +126,40 @@ class MLDelta
     return _activateOutputValue(_sum)
   end
 
-  def _fDashOfNet(_netOutput)
-    _dashValue = _netOutput
+  def _fDashOfNet(net_output)
     case @activeMethod
       when MLActiveMethod::SGN
-        _dashValue = @active_function.dashSgn(_netOutput)
+        @active_function.dashSgn(net_output)
       when MLActiveMethod::SIGMOID
-        _dashValue = @active_function.dashSigmoid(_netOutput)
+        @active_function.dashSigmoid(net_output)
       when MLActiveMethod::TANH
-        _dashValue = @active_function.dashTanh(_netOutput)
+        @active_function.dashTanh(net_output)
       when MLActiveMethod::RBF
-        #_dashValue = @active_function.dashRbf(_netOutput)
+        #_@active_function.dashRbf(net_output)
       else
         # Nothing else
+        net_output
     end
-    return _dashValue
   end
 
   # Delta defined cost function formula
-  def _calculateIterationError()
-    return (@sum_error / @patterns.count()) * 0.5
+  def _calculateIterationError
+    (@sum_error / @patterns.count) * 0.5
   end
 
-  def sum_error(_errorValue)
-    @sum_error   += (_errorValue * _errorValue)
+  def sum_error(error_value)
+    @sum_error += (error_value ** 2)
   end
 
-  def _turningWeightsWithInputs(_inputs, _targetValue)
+  def _turningWeightsWithInputs(inputs, target_value)
     _weights      = @weights
-    _learningRate = @learningRate
-    _netOutput    = _fOfNetWithInputs(_inputs)
+    _netOutput    = _fOfNetWithInputs(inputs)
     _dashOutput   = _fDashOfNet(_netOutput)
-    _errorValue   = _targetValue - _netOutput
+    _errorValue   = target_value - _netOutput
 
     # new weights = learning rate * (target value - net output) * f'(net) * x1 + w1
-    _sigmaValue   = _learningRate * _errorValue * _dashOutput
-    _deltaWeights = _multiplyMatrix(_inputs, _sigmaValue)
+    _sigmaValue   = @learningRate * _errorValue * _dashOutput
+    _deltaWeights = multiply_matrix(inputs, _sigmaValue)
     _newWeights   = _plusMatrix(_weights, _deltaWeights)
 
     @weights.clear()
