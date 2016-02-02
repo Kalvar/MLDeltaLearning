@@ -40,7 +40,7 @@ delta.training_with_iteration(iteration_block, completion_block)
 ```
 
 #### Lazy Case
-1. If you wish automatic setups all weights of pattern that you could use delta.randomWeights() to instead of delta.setupWeights().
+1. If you wish automatic setups all weights of pattern that you could use delta.random_weights() to instead of delta.setup_weights().
 2. If you just wanna see the result without iteration running that you could directly use the method as below :
 
 ``` ruby
