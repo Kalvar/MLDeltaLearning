@@ -1,9 +1,8 @@
 # Activition Functions
-#
+
 class MLActiveFunction
   def tanh(x)
     ( 2.0 / ( 1.0 + Math.exp(-1.0 * x) ) ) - 1.0
-    # return Math.tanh(_x)
   end
 
   def sigmoid(x)
@@ -18,7 +17,7 @@ class MLActiveFunction
     Math.exp((-x) / (2.0 * sigma * sigma))
   end
 
-  def dashTanh(output)
+  def dash_tanh(output)
     ( 1.0 - ( output * output ) ) * 0.5
   end
 
@@ -26,13 +25,11 @@ class MLActiveFunction
     ( 1.0 - output ) * output
   end
 
-  def dashSgn(output)
+  def dash_sgn(output)
     output
   end
 
-  def dashRbf(output)
+  def dash_rbf(output)
     output
-    #return 1.0 + _output + ( _output * _output )
-    #return 1.0 - _output
   end
 end
