@@ -11,11 +11,11 @@ require './ml_delta'
 
 #### Normal Case
 ``` ruby
-delta = MLDelta.new
-delta.active_method = MLActiveMethod::TANH
-delta.learning_rate = 0.8
+delta                   = MLDelta.new
+delta.active_method     = MLActiveMethod::TANH
+delta.learning_rate     = 0.8
 delta.convergence_value = 0.001
-delta.max_iteration = 1000
+delta.max_iteration     = 1000
 delta.add_patterns([1.0, -2.0, 0.0, -1.0], -1.0)
 delta.add_patterns([0.0, 1.5, -0.5, -1.0], 1.0)
 delta.setup_weights([1.0, -1.0, 0.0, 0.5])
@@ -52,7 +52,7 @@ delta.training_with_completion {
 
 ## Version
 
-V1.0
+V1.0.1
 
 ## LICENSE
 
