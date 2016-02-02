@@ -5,24 +5,25 @@ DEFAULT_RANDOM_MAX = 0.5
 DEFAULT_RANDOM_MIN = -0.5
 
 class MLDelta
+
   attr_accessor :learning_rate, :max_iteration, :convergence_value, :active_method
 
   def initialize
-    @active_function = MLActiveFunction.new
-    @active_method = MLActiveMethod::TANH
-    @iteration = 0
-    @sum_error = 0.0
-    @patterns = []
-    @weights = []
-    @targets = []
-    @learning_rate = 0.5
-    @max_iteration = 1
+    @active_function   = MLActiveFunction.new
+    @active_method     = MLActiveMethod::TANH
+    @iteration         = 0
+    @sum_error         = 0.0
+    @patterns          = []
+    @weights           = []
+    @targets           = []
+    @learning_rate     = 0.5
+    @max_iteration     = 1
     @convergence_value = 0.001
   end
 
   def add_patterns(inputs, target)
     @patterns << inputs
-    @targets << target
+    @targets  << target
   end
 
   def setup_weights(weights)
@@ -35,15 +36,15 @@ class MLDelta
 
     # Follows the inputs count to decide how many weights it needs.
     net_count = @patterns.first.count
-    max = DEFAULT_RANDOM_MAX / net_count
-    min = DEFAULT_RANDOM_MIN / net_count
+    max       = DEFAULT_RANDOM_MAX / net_count
+    min       = DEFAULT_RANDOM_MIN / net_count
 
     net_count.times { @weights << rand(min..max) }
   end
 
   def training
     @iteration += 1
-    @sum_error = 0.0
+    @sum_error  = 0.0
     @patterns.each_with_index{ |inputs, index|
       turning_weights_with_inputs(inputs, @targets[index])
     }
@@ -104,13 +105,13 @@ class MLDelta
   def dash_of_net(net_output)
     case @active_method
       when MLActiveMethod::SGN
-        @active_function.dashSgn net_output
+        @active_function.dash_sgn net_output
       when MLActiveMethod::SIGMOID
-        @active_function.dashSigmoid net_output
+        @active_function.dash_sigmoid net_output
       when MLActiveMethod::TANH
-        @active_function.dashTanh net_output
+        @active_function.dash_tanh net_output
       when MLActiveMethod::RBF
-        #@active_function.dashRbf net_output
+        #@active_function.dash_rbf net_output
       else
         # Nothing else
         net_output
@@ -127,17 +128,16 @@ class MLDelta
   end
 
   def turning_weights_with_inputs(inputs, target_value)
-    net_output = net_with_inputs(inputs)
-    dash_output = dash_of_net(net_output)
-    error_value = target_value - net_output
+    net_output    = net_with_inputs(inputs)
+    dash_output   = dash_of_net(net_output)
+    error_value   = target_value - net_output
 
     # new weights = learning rate * (target value - net output) * f'(net) * x1 + w1
-    simga_value = @learning_rate * error_value * dash_output
+    simga_value   = @learning_rate * error_value * dash_output
     delta_weights = multiply_matrix(inputs, simga_value)
-    new_weights = plus_matrix(@weights, delta_weights)
+    new_weights   = plus_matrix(@weights, delta_weights)
 
     setup_weights(new_weights)
     sum_error(error_value)
   end
 end
-
