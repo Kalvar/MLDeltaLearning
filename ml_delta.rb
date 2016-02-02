@@ -1,12 +1,13 @@
-require './ml_active_function'
-require './ml_active_method'
+# Dynamic loading and matching the PATH of files
+$LOAD_PATH.unshift(File.dirname(__FILE__)) unless $LOAD_PATH.include?(File.dirname(__FILE__))  
+#Dir["/path/*.rb"].each { |file| require file }
 
-DEFAULT_RANDOM_MAX = 0.5
-DEFAULT_RANDOM_MIN = -0.5
+require 'ml_active_function'
+require 'ml_active_method'
 
 class MLDelta
 
-  attr_accessor :learning_rate, :max_iteration, :convergence_value, :active_method
+  attr_accessor :learning_rate, :max_iteration, :convergence_value, :active_method, :random_scopes
 
   def initialize
     @active_function   = MLActiveFunction.new
@@ -19,6 +20,7 @@ class MLDelta
     @learning_rate     = 0.5
     @max_iteration     = 1
     @convergence_value = 0.001
+    @random_scopes     = [-0.5, 0.5]
   end
 
   def add_patterns(inputs, target)
@@ -31,13 +33,18 @@ class MLDelta
     @weights += weights
   end
 
+  def setup_random_scopes(min, max)
+    @random_scopes.clear
+    @random_scopes = [min, max]
+  end
+
   def random_weights
     @weights.clear
 
     # Follows the inputs count to decide how many weights it needs.
     net_count = @patterns.first.count
-    max       = DEFAULT_RANDOM_MAX / net_count
-    min       = DEFAULT_RANDOM_MIN / net_count
+    max       = random_scopes.last / net_count
+    min       = random_scopes.first / net_count
 
     net_count.times { @weights << rand(min..max) }
   end
