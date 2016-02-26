@@ -29,7 +29,7 @@ class MLActiveFunction
     output
   end
 
-  def dash_rbf(output)
-    output
+  def dash_rbf(output, sigma)
+    -((2.0 * output) / (2.0 * sigma * sigma)) * Math.exp((-output) / (2.0 * sigma * sigma))
   end
 end

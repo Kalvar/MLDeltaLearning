@@ -7,7 +7,7 @@ require 'ml_active_method'
 
 class MLDelta
 
-  attr_accessor :learning_rate, :max_iteration, :convergence_value, :active_method, :random_scopes
+  attr_accessor :learning_rate, :max_iteration, :convergence_value, :active_method, :random_scopes, :completion_block
 
   def initialize
     @active_function   = MLActiveFunction.new
@@ -118,7 +118,7 @@ class MLDelta
       when MLActiveMethod::TANH
         @active_function.dash_tanh net_output
       when MLActiveMethod::RBF
-        #@active_function.dash_rbf net_output
+        @active_function.dash_rbf net_output, 2.0
       else
         # Nothing else
         net_output
@@ -148,3 +148,4 @@ class MLDelta
     sum_error(error_value)
   end
 end
+
