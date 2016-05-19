@@ -21,7 +21,7 @@ class MLActiveFunction
     ( 1.0 - ( output * output ) ) * 0.5
   end
 
-  def dashSigmoid(output)
+  def dash_sigmoid(output)
     ( 1.0 - output ) * output
   end
 
